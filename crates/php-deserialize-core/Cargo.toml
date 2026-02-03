@@ -1,0 +1,33 @@
+[package]
+name = "php-deserialize-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "High-performance PHP serialize/unserialize parser"
+
+[features]
+default = []
+serde = ["dep:serde", "dep:serde_json"]
+tracing = ["dep:tracing"]
+
+[dependencies]
+thiserror.workspace = true
+memchr.workspace = true
+bstr.workspace = true
+serde = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+tracing = { version = "0.1", optional = true }
+
+[dev-dependencies]
+criterion.workspace = true
+
+[[bench]]
+name = "parser"
+harness = false
