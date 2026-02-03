@@ -32,10 +32,14 @@ Thumbs.db
 
 # Testing
 .pytest_cache/
+.hypothesis/
 .coverage
 htmlcov/
 .tox/
 .nox/
+
+# Claude Code
+.claude/
 
 # Build artifacts
 *.whl
