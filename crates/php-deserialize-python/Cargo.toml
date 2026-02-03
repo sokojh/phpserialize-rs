@@ -1,0 +1,16 @@
+[package]
+name = "php-deserialize-python"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Python bindings for php-deserialize-core"
+
+[lib]
+name = "_core"
+crate-type = ["cdylib"]
+
+[dependencies]
+php-deserialize-core = { workspace = true, features = ["serde"] }
+pyo3.workspace = true
+serde_json.workspace = true
