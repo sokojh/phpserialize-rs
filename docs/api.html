@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference - phpserialize-rs</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-yellow: #d29922;
+            --accent-red: #f85149;
+            --border: #30363d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+
+        .sidebar h3 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin: 20px 0 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar a {
+            color: var(--text-primary);
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 2px;
+            transition: background 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: var(--bg-primary);
+            color: var(--accent);
+        }
+
+        .sidebar a.active {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        /* Main content */
+        .main {
+            margin-left: 280px;
+            padding: 40px;
+            flex: 1;
+            max-width: 900px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin: 40px 0 20px;
+            color: var(--accent);
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            margin: 30px 0 15px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+
+        pre {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+
+        .inline-code {
+            background: var(--bg-secondary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* Function signature */
+        .signature {
+            background: var(--bg-secondary);
+            border-left: 4px solid var(--accent);
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .signature code {
+            color: var(--accent-green);
+        }
+
+        /* Parameters table */
+        .params-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .params-table th,
+        .params-table td {
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .params-table th {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .params-table .type {
+            color: var(--accent-yellow);
+            font-family: monospace;
+        }
+
+        .params-table .default {
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+        /* Return type */
+        .returns {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+
+        .returns h4 {
+            color: var(--accent-green);
+            margin-bottom: 10px;
+        }
+
+        /* Exception */
+        .raises {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid var(--accent-red);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+
+        .raises h4 {
+            color: var(--accent-red);
+            margin-bottom: 10px;
+        }
+
+        /* Example */
+        .example {
+            margin: 20px 0;
+        }
+
+        .example h4 {
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+
+        /* Back link */
+        .back-link {
+            display: inline-block;
+            color: var(--accent);
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+            .main {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <h2>phpserialize-rs</h2>
+            <a href="index.html" class="back-link">&larr; Back to Home</a>
+
+            <h3>Functions</h3>
+            <ul>
+                <li><a href="#loads">loads()</a></li>
+                <li><a href="#loads_json">loads_json()</a></li>
+                <li><a href="#is_serialized">is_serialized()</a></li>
+                <li><a href="#preprocess">preprocess()</a></li>
+                <li><a href="#version">version()</a></li>
+            </ul>
+
+            <h3>Exceptions</h3>
+            <ul>
+                <li><a href="#PhpDeserializeError">PhpDeserializeError</a></li>
+            </ul>
+
+            <h3>PySpark</h3>
+            <ul>
+                <li><a href="#php_deserialize_udf">php_deserialize_udf()</a></li>
+                <li><a href="#php_deserialize_pandas_udf">php_deserialize_pandas_udf()</a></li>
+            </ul>
+
+            <h3>Rust API</h3>
+            <ul>
+                <li><a href="#rust-from_bytes">from_bytes()</a></li>
+                <li><a href="#rust-PhpValue">PhpValue</a></li>
+            </ul>
+        </aside>
+
+        <main class="main">
+            <h1>API Reference</h1>
+            <p>Complete API documentation for phpserialize-rs Python bindings.</p>
+
+            <!-- loads() -->
+            <h2 id="loads">loads()</h2>
+            <p>Deserialize PHP serialized data to a Python object.</p>
+
+            <div class="signature">
+                <code>loads(data: bytes, *, errors: str = "replace", auto_unescape: bool = True) -> Any</code>
+            </div>
+
+            <h3>Parameters</h3>
+            <table class="params-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>data</code></td>
+                        <td class="type">bytes</td>
+                        <td>-</td>
+                        <td>PHP serialized data</td>
+                    </tr>
+                    <tr>
+                        <td><code>errors</code></td>
+                        <td class="type">str</td>
+                        <td class="default">"replace"</td>
+                        <td>
+                            Error handling for invalid UTF-8:<br>
+                            <code>"strict"</code> - Raise exception<br>
+                            <code>"replace"</code> - Replace with U+FFFD<br>
+                            <code>"bytes"</code> - Return bytes instead of str
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>auto_unescape</code></td>
+                        <td class="type">bool</td>
+                        <td class="default">True</td>
+                        <td>Automatically detect and unescape DB-exported strings</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="returns">
+                <h4>Returns</h4>
+                <p><span class="type">dict | list | str | int | float | bool | None | bytes</span></p>
+                <p>The deserialized Python object. Arrays become <code>list</code> (sequential) or <code>dict</code> (associative).</p>
+            </div>
+
+            <div class="raises">
+                <h4>Raises</h4>
+                <p><code>PhpDeserializeError</code> - If the data cannot be parsed</p>
+            </div>
+
+            <div class="example">
+                <h4>Example</h4>
+                <pre><code class="language-python">from php_deserialize import loads
+
+# Basic usage
+result = loads(b'a:2:{s:4:"name";s:5:"Alice";s:3:"age";i:30;}')
+# {'name': 'Alice', 'age': 30}
+
+# Korean text
+result = loads(b's:6:"\xed\x95\x9c\xea\xb8\x80";')
+# '한글'
+
+# Invalid UTF-8 handling
+result = loads(b's:4:"\xff\xfe\xfd\xfc";', errors="bytes")
+# b'\xff\xfe\xfd\xfc'</code></pre>
+            </div>
+
+            <!-- loads_json() -->
+            <h2 id="loads_json">loads_json()</h2>
+            <p>Deserialize PHP serialized data directly to a JSON string. Optimized for Databricks/Spark workloads.</p>
+
+            <div class="signature">
+                <code>loads_json(data: bytes, *, auto_unescape: bool = True) -> str</code>
+            </div>
+
+            <h3>Parameters</h3>
+            <table class="params-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>data</code></td>
+                        <td class="type">bytes</td>
+                        <td>-</td>
+                        <td>PHP serialized data</td>
+                    </tr>
+                    <tr>
+                        <td><code>auto_unescape</code></td>
+                        <td class="type">bool</td>
+                        <td class="default">True</td>
+                        <td>Automatically detect and unescape DB-exported strings</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="returns">
+                <h4>Returns</h4>
+                <p><span class="type">str</span> - JSON string representation</p>
+            </div>
+
+            <div class="example">
+                <h4>Example</h4>
+                <pre><code class="language-python">from php_deserialize import loads_json
+
+json_str = loads_json(b'a:2:{s:4:"name";s:5:"Alice";s:3:"age";i:30;}')
+# '{"name":"Alice","age":30}'</code></pre>
+            </div>
+
+            <!-- is_serialized() -->
+            <h2 id="is_serialized">is_serialized()</h2>
+            <p>Quick check if data looks like PHP serialized format (doesn't fully validate).</p>
+
+            <div class="signature">
+                <code>is_serialized(data: bytes) -> bool</code>
+            </div>
+
+            <div class="example">
+                <h4>Example</h4>
+                <pre><code class="language-python">from php_deserialize import is_serialized
+
+is_serialized(b'a:1:{i:0;s:3:"foo";}')  # True
+is_serialized(b'not serialized')         # False
+is_serialized(b'')                       # False</code></pre>
+            </div>
+
+            <!-- preprocess() -->
+            <h2 id="preprocess">preprocess()</h2>
+            <p>Preprocess data to unescape DB-exported strings manually.</p>
+
+            <div class="signature">
+                <code>preprocess(data: bytes) -> bytes</code>
+            </div>
+
+            <div class="example">
+                <h4>Example</h4>
+                <pre><code class="language-python">from php_deserialize import preprocess
+
+escaped = b'"a:1:{s:3:""key"";s:5:""value"";}"'
+unescaped = preprocess(escaped)
+# b'a:1:{s:3:"key";s:5:"value";}'</code></pre>
+            </div>
+
+            <!-- PhpDeserializeError -->
+            <h2 id="PhpDeserializeError">PhpDeserializeError</h2>
+            <p>Exception raised when PHP deserialization fails.</p>
+
+            <div class="example">
+                <h4>Example</h4>
+                <pre><code class="language-python">from php_deserialize import loads, PhpDeserializeError
+
+try:
+    loads(b"invalid data")
+except PhpDeserializeError as e:
+    print(f"Error: {e}")</code></pre>
+            </div>
+
+            <!-- PySpark UDF -->
+            <h2 id="php_deserialize_udf">php_deserialize_udf()</h2>
+            <p>Create a PySpark UDF for deserializing PHP serialized data.</p>
+
+            <div class="signature">
+                <code>php_deserialize_udf(output_format: str = "json", errors: str = "replace", auto_unescape: bool = True) -> Callable</code>
+            </div>
+
+            <h3>Parameters</h3>
+            <table class="params-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>output_format</code></td>
+                        <td class="type">str</td>
+                        <td class="default">"json"</td>
+                        <td><code>"json"</code> returns JSON string, <code>"python"</code> returns Python object</td>
+                    </tr>
+                    <tr>
+                        <td><code>errors</code></td>
+                        <td class="type">str</td>
+                        <td class="default">"replace"</td>
+                        <td>Error handling mode</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="example">
+                <h4>Example</h4>
+                <pre><code class="language-python">from php_deserialize.spark import php_deserialize_udf
+
+deserialize = php_deserialize_udf("json")
+df = df.withColumn("parsed", deserialize("php_data"))</code></pre>
+            </div>
+
+            <!-- Pandas UDF -->
+            <h2 id="php_deserialize_pandas_udf">php_deserialize_pandas_udf()</h2>
+            <p>Create a batch-optimized Pandas UDF (recommended for large datasets).</p>
+
+            <div class="signature">
+                <code>php_deserialize_pandas_udf(errors: str = "replace", auto_unescape: bool = True) -> Callable</code>
+            </div>
+
+            <div class="example">
+                <h4>Example</h4>
+                <pre><code class="language-python">from php_deserialize.spark import php_deserialize_pandas_udf
+
+pandas_udf = php_deserialize_pandas_udf()
+df = df.withColumn("parsed", pandas_udf("php_data"))</code></pre>
+            </div>
+
+            <!-- Rust API -->
+            <h2 id="rust-from_bytes">Rust: from_bytes()</h2>
+            <p>Parse PHP serialized data from bytes.</p>
+
+            <div class="signature">
+                <code>pub fn from_bytes(data: &[u8]) -> Result&lt;PhpValue&lt;'_&gt;&gt;</code>
+            </div>
+
+            <div class="example">
+                <h4>Example</h4>
+                <pre><code class="language-rust">use php_deserialize_core::from_bytes;
+
+let data = b"s:5:\"hello\";";
+let value = from_bytes(data)?;</code></pre>
+            </div>
+
+            <h2 id="rust-PhpValue">Rust: PhpValue</h2>
+            <p>Enum representing all PHP value types.</p>
+
+            <pre><code class="language-rust">pub enum PhpValue&lt;'a&gt; {
+    Null,
+    Bool(bool),
+    Int(i64),
+    Float(f64),
+    String(Cow&lt;'a, [u8]&gt;),
+    Array(Vec&lt;(PhpValue&lt;'a&gt;, PhpValue&lt;'a&gt;)&gt;),
+    Object {
+        class_name: Cow&lt;'a, str&gt;,
+        properties: Vec&lt;PhpProperty&lt;'a&gt;&gt;,
+    },
+    Enum {
+        class_name: Cow&lt;'a, str&gt;,
+        case_name: Cow&lt;'a, str&gt;,
+    },
+    Reference(usize),
+}</code></pre>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/rust.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</body>
+</html>
