@@ -1,0 +1,77 @@
+[build-system]
+requires = ["maturin>=1.4,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "phpserialize-rs"
+version = "0.1.0"
+description = "High-performance PHP serialize/unserialize parser written in Rust with Python bindings"
+readme = "README.md"
+license = { text = "MIT OR Apache-2.0" }
+authors = [
+    { name = "Jiho Kim", email = "jiho.kim@example.com" }
+]
+keywords = ["php", "serialize", "deserialize", "parser", "rust"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Rust",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+requires-python = ">=3.8"
+
+[project.optional-dependencies]
+spark = ["pyspark>=3.0"]
+dev = [
+    "pytest>=7.0",
+    "pytest-benchmark>=4.0",
+    "hypothesis>=6.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/imweb/php-deserialize"
+Repository = "https://github.com/imweb/php-deserialize"
+Documentation = "https://github.com/imweb/php-deserialize#readme"
+Issues = "https://github.com/imweb/php-deserialize/issues"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+python-source = "python"
+module-name = "php_deserialize._core"
+manifest-path = "crates/php-deserialize-python/Cargo.toml"
+
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+markers = [
+    "hypothesis: property-based tests using Hypothesis (run with: pytest -m hypothesis)",
+]
+# Exclude hypothesis tests by default (they're slow)
+# Run all tests with: pytest -m ""
+# Run only hypothesis tests with: pytest -m hypothesis
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4"]
+
+[tool.mypy]
+python_version = "3.8"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true

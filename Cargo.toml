@@ -1,0 +1,33 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/php-deserialize-core",
+    "crates/php-deserialize-python",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.70"
+authors = ["Jiho Kim <jiho.kim@example.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/imweb/php-deserialize"
+homepage = "https://github.com/imweb/php-deserialize"
+documentation = "https://docs.rs/php-deserialize-core"
+keywords = ["php", "serialize", "deserialize", "parser"]
+categories = ["parsing", "encoding"]
+
+[workspace.dependencies]
+php-deserialize-core = { path = "crates/php-deserialize-core", version = "0.1.0" }
+thiserror = "1.0"
+memchr = "2.7"
+bstr = "1.9"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+pyo3 = { version = "0.22", features = ["extension-module"] }
+criterion = "0.5"
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
