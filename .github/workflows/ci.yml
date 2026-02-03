@@ -103,7 +103,7 @@ jobs:
         run: pip install target/wheels/*.whl
 
       - name: Install test dependencies
-        run: pip install pytest pytest-benchmark
+        run: pip install pytest pytest-benchmark hypothesis
 
       - name: Run Python tests
         run: pytest tests/python -v
