@@ -14,6 +14,9 @@ env:
   PACKAGE_NAME: phpserialize-rs
   CRATE_NAME: php-deserialize-core
 
+permissions:
+  contents: write
+
 jobs:
   # Create GitHub release
   create-release:
