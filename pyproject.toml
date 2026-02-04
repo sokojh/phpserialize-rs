@@ -40,10 +40,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/imweb/php-deserialize"
-Repository = "https://github.com/imweb/php-deserialize"
-Documentation = "https://github.com/imweb/php-deserialize#readme"
-Issues = "https://github.com/imweb/php-deserialize/issues"
+Homepage = "https://github.com/sokojh/phpserialize-rs"
+Repository = "https://github.com/sokojh/phpserialize-rs"
+Documentation = "https://sokojh.github.io/phpserialize-rs/"
+Issues = "https://github.com/sokojh/phpserialize-rs/issues"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]

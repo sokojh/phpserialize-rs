@@ -2,7 +2,7 @@
 
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::{PyBytes, PyDict, PyList, PyString};
+use pyo3::types::{PyBytes, PyDict, PyList};
 
 use php_deserialize_core::{
     from_bytes_with_config, json::to_json_string, ParserConfig, PhpValue,

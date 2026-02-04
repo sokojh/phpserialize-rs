@@ -3,7 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/php-deserialize-core.svg)](https://crates.io/crates/php-deserialize-core)
 [![PyPI](https://img.shields.io/pypi/v/phpserialize-rs.svg)](https://pypi.org/project/phpserialize-rs/)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE)
-[![CI](https://github.com/imweb/php-deserialize/workflows/CI/badge.svg)](https://github.com/imweb/php-deserialize/actions)
+[![CI](https://github.com/sokojh/phpserialize-rs/workflows/CI/badge.svg)](https://github.com/sokojh/phpserialize-rs/actions)
 
 High-performance PHP serialize/unserialize parser written in Rust with Python bindings.
 

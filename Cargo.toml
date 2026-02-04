@@ -11,9 +11,9 @@ edition = "2021"
 rust-version = "1.70"
 authors = ["Jiho Kim <jiho.kim@example.com>"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/imweb/php-deserialize"
-homepage = "https://github.com/imweb/php-deserialize"
-documentation = "https://docs.rs/php-deserialize-core"
+repository = "https://github.com/sokojh/phpserialize-rs"
+homepage = "https://github.com/sokojh/phpserialize-rs"
+documentation = "https://sokojh.github.io/phpserialize-rs/"
 keywords = ["php", "serialize", "deserialize", "parser"]
 categories = ["parsing", "encoding"]
 
