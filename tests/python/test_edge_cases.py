@@ -75,11 +75,16 @@ class TestMalformedInput:
             loads(b"z:1;")
 
     def test_string_length_mismatch(self):
-        """String with wrong length should raise error."""
+        """String with wrong length - auto-fallback recovers by default."""
         from php_deserialize import PhpDeserializeError, loads
 
+        # Default behavior (strict=False): auto-fallback recovers from length mismatch
+        result = loads(b's:10:"hello";')  # Declared 10, actual 5
+        assert result == "hello"  # Successfully recovered
+
+        # With strict=True: should raise error
         with pytest.raises(PhpDeserializeError):
-            loads(b's:10:"hello";')  # Declared 10, actual 5
+            loads(b's:10:"hello";', strict=True)
 
     def test_negative_string_length(self):
         """Negative string length should raise error."""

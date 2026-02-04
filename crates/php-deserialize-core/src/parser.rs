@@ -40,6 +40,16 @@ pub struct ParserConfig {
     pub auto_unescape: bool,
     /// Whether to be strict about UTF-8 encoding in strings.
     pub strict_utf8: bool,
+    /// Whether to disable automatic fallback for string length mismatches.
+    ///
+    /// When `strict` is `false` (the default), the parser will automatically try
+    /// lenient recovery when strict parsing fails for strings. This handles cases
+    /// where data was serialized with a different encoding (e.g., EUC-KR) but
+    /// stored/transmitted as UTF-8.
+    ///
+    /// When `strict` is `true`, the parser will fail immediately on string length
+    /// mismatches without attempting recovery.
+    pub strict: bool,
 }
 
 impl Default for ParserConfig {
@@ -48,6 +58,7 @@ impl Default for ParserConfig {
             max_depth: MAX_DEPTH,
             auto_unescape: true,
             strict_utf8: false,
+            strict: false, // Auto-fallback enabled by default
         }
     }
 }
@@ -251,6 +262,9 @@ impl<'a> Parser<'a> {
     }
 
     /// Parse a string value: `s:<len>:"<data>";`
+    ///
+    /// By default (when `config.strict` is `false`), this method will automatically
+    /// try lenient recovery if strict parsing fails due to string length mismatches.
     fn parse_string(&mut self) -> Result<PhpValue<'a>> {
         self.expect_byte(b's')?;
         self.expect_byte(b':')?;
@@ -268,8 +282,38 @@ impl<'a> Parser<'a> {
         self.expect_byte(b':')?;
         self.expect_byte(b'"')?;
 
-        // Read exactly `len` bytes
         let string_start = self.pos;
+
+        // Try strict parsing first
+        if self.pos + len <= self.data.len() {
+            // Check if the declared length works
+            let potential_end = self.pos + len;
+            if potential_end + 1 < self.data.len()
+                && self.data[potential_end] == b'"'
+                && self.data[potential_end + 1] == b';'
+            {
+                // Strict parsing works
+                let string_data = &self.data[self.pos..potential_end];
+                self.pos = potential_end;
+                self.expect_byte(b'"')?;
+                self.expect_byte(b';')?;
+                return Ok(PhpValue::String(Cow::Borrowed(string_data)));
+            }
+        }
+
+        // Strict parsing failed - try automatic fallback unless strict mode is enabled
+        if !self.config.strict {
+            #[cfg(feature = "tracing")]
+            warn!(
+                pos = string_start,
+                declared_len = len,
+                "Strict string parsing failed, attempting automatic lenient recovery"
+            );
+
+            return self.parse_string_lenient(string_start, len);
+        }
+
+        // Strict mode - return error without fallback
         if self.pos + len > self.data.len() {
             return Err(PhpDeserializeError::new(
                 ErrorKind::StringLengthMismatch {
@@ -280,13 +324,88 @@ impl<'a> Parser<'a> {
             ));
         }
 
-        let string_data = &self.data[self.pos..self.pos + len];
+        // Move position and expect closing chars (will fail with better error)
         self.pos += len;
-
         self.expect_byte(b'"')?;
         self.expect_byte(b';')?;
 
-        Ok(PhpValue::String(Cow::Borrowed(string_data)))
+        unreachable!()
+    }
+
+    /// Parse a string in lenient mode by searching for the `";` pattern.
+    #[cold]
+    fn parse_string_lenient(&mut self, string_start: usize, declared_len: usize) -> Result<PhpValue<'a>> {
+        #[cfg(feature = "tracing")]
+        trace!(
+            declared_len = declared_len,
+            pos = string_start,
+            "Using lenient string parsing"
+        );
+
+        // Search for `";` pattern from the current position
+        // We need to be careful: the string might contain `";` as content
+        // Strategy: search for `";` and verify it's followed by a valid type marker or end
+        let search_start = string_start;
+        let mut search_pos = search_start;
+
+        while search_pos < self.data.len().saturating_sub(1) {
+            // Find next `"` character
+            match memchr(b'"', &self.data[search_pos..]) {
+                Some(offset) => {
+                    let quote_pos = search_pos + offset;
+                    // Check if followed by `;`
+                    if quote_pos + 1 < self.data.len() && self.data[quote_pos + 1] == b';' {
+                        // Verify this is a valid end by checking what follows
+                        let after_semicolon = quote_pos + 2;
+                        let is_valid_end = if after_semicolon >= self.data.len() {
+                            // End of data - valid
+                            true
+                        } else {
+                            // Check for valid following byte
+                            let next_byte = self.data[after_semicolon];
+                            // Valid: type marker, closing brace, or another string/array start
+                            matches!(
+                                next_byte,
+                                b'N' | b'b' | b'i' | b'd' | b's' | b'a' | b'O' | b'C'
+                                    | b'R' | b'r' | b'E' | b'}'
+                            )
+                        };
+
+                        if is_valid_end {
+                            // Found valid end
+                            let string_data = &self.data[string_start..quote_pos];
+                            self.pos = quote_pos;
+                            self.expect_byte(b'"')?;
+                            self.expect_byte(b';')?;
+
+                            #[cfg(feature = "tracing")]
+                            if string_data.len() != declared_len {
+                                warn!(
+                                    declared = declared_len,
+                                    actual = string_data.len(),
+                                    "String length mismatch recovered"
+                                );
+                            }
+
+                            return Ok(PhpValue::String(Cow::Borrowed(string_data)));
+                        }
+                    }
+                    // Not a valid end, continue searching
+                    search_pos = quote_pos + 1;
+                }
+                None => break,
+            }
+        }
+
+        // Could not find valid end
+        Err(PhpDeserializeError::new(
+            ErrorKind::StringLengthMismatch {
+                expected: declared_len,
+                found: self.data.len() - string_start,
+            },
+            string_start,
+        )
+        .with_context("lenient parsing also failed to find string end"))
     }
 
     /// Parse an array value: `a:<count>:{<key><value>...}`
@@ -762,6 +881,7 @@ pub fn from_bytes(data: &[u8]) -> Result<PhpValue<'_>> {
 ///     max_depth: 64,
 ///     auto_unescape: false,
 ///     strict_utf8: true,
+///     strict: true, // Disable automatic fallback for string length mismatches
 /// };
 /// let value = from_bytes_with_config(b"i:42;", config).unwrap();
 /// ```
@@ -1034,5 +1154,44 @@ mod tests {
         // "say "hi"" = 8 bytes
         let result = from_bytes(b"s:8:\"say \"hi\"\";").unwrap();
         assert_eq!(result.as_str(), Some("say \"hi\""));
+    }
+
+    #[test]
+    fn test_auto_fallback_encoding_mismatch() {
+        // "한글" is 6 bytes in UTF-8, but declared as 4 (EUC-KR byte count)
+        // This simulates data serialized with EUC-KR but stored as UTF-8
+        // Default config (strict=false) should auto-recover
+        let data = b"s:4:\"\xed\x95\x9c\xea\xb8\x80\";";
+        let result = from_bytes(data).unwrap();
+        assert_eq!(result.as_str(), Some("한글"));
+    }
+
+    #[test]
+    fn test_auto_fallback_in_array() {
+        // Array containing a string with encoding mismatch
+        // "한글" = 6 bytes in UTF-8, declared as 4
+        let data = b"a:1:{s:3:\"key\";s:4:\"\xed\x95\x9c\xea\xb8\x80\";}";
+        let result = from_bytes(data).unwrap();
+        let map = result.as_string_map().unwrap();
+        assert_eq!(map.get("key").unwrap().as_str(), Some("한글"));
+    }
+
+    #[test]
+    fn test_strict_mode_fails_on_mismatch() {
+        // Same data but with strict=true should fail
+        let data = b"s:4:\"\xed\x95\x9c\xea\xb8\x80\";";
+        let config = ParserConfig {
+            strict: true,
+            ..Default::default()
+        };
+        let result = from_bytes_with_config(data, config);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_strict_false_is_default() {
+        // Verify that strict=false (auto-fallback enabled) is the default
+        let config = ParserConfig::default();
+        assert!(!config.strict);
     }
 }

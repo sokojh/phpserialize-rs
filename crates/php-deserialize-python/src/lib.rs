@@ -122,11 +122,18 @@ fn php_value_to_python(py: Python<'_>, value: &PhpValue, errors: &str) -> PyResu
 /// Args:
 ///     data: Bytes containing PHP serialized data
 ///     errors: Error handling mode for invalid UTF-8:
-///         - "strict": Raise an exception (default)
-///         - "replace": Replace invalid bytes with replacement character
+///         - "strict": Raise an exception
+///         - "replace": Replace invalid bytes with replacement character (default)
 ///         - "bytes": Return bytes instead of string for binary data
 ///         - "surrogateescape": Use surrogateescape encoding
 ///     auto_unescape: Automatically detect and unescape DB-exported strings (default: True)
+///     strict: Disable automatic fallback for string length mismatches (default: False)
+///         When False (default), the parser will automatically try lenient recovery
+///         if strict parsing fails due to string length mismatches. This is useful
+///         for data that was serialized with a different encoding (e.g., EUC-KR)
+///         but stored as UTF-8.
+///         When True, the parser will fail immediately on string length mismatches
+///         without attempting recovery.
 ///
 /// Returns:
 ///     The deserialized Python object (dict, list, str, int, float, bool, or None)
@@ -138,16 +145,26 @@ fn php_value_to_python(py: Python<'_>, value: &PhpValue, errors: &str) -> PyResu
 ///     >>> from php_deserialize import loads
 ///     >>> loads(b'a:2:{s:4:"name";s:5:"Alice";s:3:"age";i:30;}')
 ///     {'name': 'Alice', 'age': 30}
+///
+///     >>> # Automatic fallback handles encoding mismatch (no option needed!)
+///     >>> loads(b'a:1:{s:4:"key";s:10:"\xed\x95\x9c\xea\xb8\x80";}')
+///     {'key': '한글'}
+///
+///     >>> # Use strict=True to disable automatic fallback
+///     >>> loads(b'a:1:{s:4:"key";s:10:"\xed\x95\x9c\xea\xb8\x80";}', strict=True)
+///     # Raises PhpDeserializeError
 #[pyfunction]
-#[pyo3(signature = (data, *, errors="replace", auto_unescape=true))]
+#[pyo3(signature = (data, *, errors="replace", auto_unescape=true, strict=false))]
 fn loads(
     py: Python<'_>,
     data: &[u8],
     errors: &str,
     auto_unescape: bool,
+    strict: bool,
 ) -> PyResult<PyObject> {
     let config = ParserConfig {
         auto_unescape,
+        strict,
         ..Default::default()
     };
 
@@ -166,6 +183,9 @@ fn loads(
 /// Args:
 ///     data: Bytes containing PHP serialized data
 ///     auto_unescape: Automatically detect and unescape DB-exported strings (default: True)
+///     strict: Disable automatic fallback for string length mismatches (default: False)
+///         When False (default), automatic recovery is attempted for encoding mismatches.
+///         When True, the parser fails immediately on string length mismatches.
 ///
 /// Returns:
 ///     A JSON string representation of the deserialized data
@@ -178,10 +198,11 @@ fn loads(
 ///     >>> loads_json(b'a:2:{s:4:"name";s:5:"Alice";s:3:"age";i:30;}')
 ///     '{"name":"Alice","age":30}'
 #[pyfunction]
-#[pyo3(signature = (data, *, auto_unescape=true))]
-fn loads_json(data: &[u8], auto_unescape: bool) -> PyResult<String> {
+#[pyo3(signature = (data, *, auto_unescape=true, strict=false))]
+fn loads_json(data: &[u8], auto_unescape: bool, strict: bool) -> PyResult<String> {
     let config = ParserConfig {
         auto_unescape,
+        strict,
         ..Default::default()
     };
 

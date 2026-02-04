@@ -13,8 +13,9 @@ High-performance PHP serialize/unserialize parser written in Rust with Python bi
 - **Full PHP serialize support** - All types including objects, references, and PHP 8.1 enums
 - **UTF-8 aware** - Proper handling of multi-byte characters (Korean, Chinese, etc.)
 - **Auto-unescape** - Automatic detection and handling of DB-escaped strings
+- **Auto-fallback** - Automatic recovery from encoding mismatches (e.g., EUC-KR to UTF-8)
 - **Error recovery** - Configurable error handling for malformed data
-- **PySpark integration** - Ready-to-use UDFs for Databricks/Spark workloads
+- **PySpark integration** - Ready-to-use Arrow-optimized UDFs for Databricks/Spark workloads
 
 ## Installation
 
@@ -52,21 +53,41 @@ escaped = b'"a:1:{s:4:""key"";s:5:""value"";}"'
 result = loads(escaped)  # Auto-unescapes
 print(result)  # {'key': 'value'}
 
+# Auto-fallback for encoding mismatches (no option needed!)
+# Handles data serialized with EUC-KR but stored as UTF-8
+mismatch = b's:4:"\xed\x95\x9c\xea\xb8\x80";'  # "한글" with wrong length
+result = loads(mismatch)  # Automatically recovers
+print(result)  # '한글'
+
+# Strict mode (disable auto-fallback)
+result = loads(data, strict=True)  # Fails on length mismatch
+
 # Error handling options
 result = loads(data, errors="replace")  # Replace invalid UTF-8
 result = loads(data, errors="bytes")    # Return bytes for invalid UTF-8
 ```
 
-### PySpark
+### PySpark / Databricks
 
 ```python
-from php_deserialize.spark import php_deserialize_udf
+from php_deserialize.spark import php_to_json
+from pyspark.sql.functions import get_json_object
 
-# Create UDF
-deserialize = php_deserialize_udf("json")
+# Convert PHP serialize to JSON (Arrow-optimized UDF)
+df = spark.table("bronze.my_table")
+df = df.withColumn("data_json", php_to_json("serialized_column"))
 
-# Use in DataFrame
-df = df.withColumn("parsed_data", deserialize("serialized_column"))
+# Extract fields from JSON
+df = df.withColumn("name", get_json_object("data_json", "$.name"))
+df = df.withColumn("age", get_json_object("data_json", "$.age"))
+
+df.display()
+```
+
+For Databricks installation:
+
+```python
+%pip install phpserialize-rs
 ```
 
 ### Rust

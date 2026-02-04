@@ -20,7 +20,7 @@ def loads(
 def loads(
     data: bytes,
     *,
-    errors: Literal["replace", "surrogateescape"],
+    errors: Literal["replace"],
     auto_unescape: bool = ...,
 ) -> dict[str, Any] | list[Any] | str | int | float | bool | None: ...
 
@@ -35,8 +35,9 @@ def loads(
 def loads(
     data: bytes,
     *,
-    errors: Literal["strict", "replace", "bytes", "surrogateescape"] = "replace",
+    errors: Literal["strict", "replace", "bytes"] = "replace",
     auto_unescape: bool = True,
+    strict: bool = False,
 ) -> dict[str, Any] | list[Any] | str | bytes | int | float | bool | None:
     """
     Deserialize PHP serialized data to a Python object.
@@ -47,8 +48,8 @@ def loads(
             - "strict": Raise an exception
             - "replace": Replace invalid bytes with replacement character (default)
             - "bytes": Return bytes instead of string for binary data
-            - "surrogateescape": Use surrogateescape encoding
         auto_unescape: Automatically detect and unescape DB-exported strings
+        strict: Disable automatic fallback for string length mismatches (default: False)
 
     Returns:
         The deserialized Python object
@@ -62,6 +63,7 @@ def loads_json(
     data: bytes,
     *,
     auto_unescape: bool = True,
+    strict: bool = False,
 ) -> str:
     """
     Deserialize PHP serialized data directly to a JSON string.
@@ -71,6 +73,7 @@ def loads_json(
     Args:
         data: Bytes containing PHP serialized data
         auto_unescape: Automatically detect and unescape DB-exported strings
+        strict: Disable automatic fallback for string length mismatches (default: False)
 
     Returns:
         A JSON string representation of the deserialized data
