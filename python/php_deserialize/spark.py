@@ -38,18 +38,15 @@ def _check_pyspark() -> None:
 
 
 def php_deserialize_udf(
-    output_format: Literal["json", "python"] = "json",
-    errors: Literal["strict", "replace", "bytes"] = "replace",
+    output_format: Literal["json"] = "json",
     auto_unescape: bool = True,
 ) -> Callable[["Column"], "Column"]:
     """
     Create a PySpark UDF for deserializing PHP serialized data.
 
     Args:
-        output_format: Output format
+        output_format: Output format - currently only "json" is supported
             - "json": Return JSON string (recommended for Spark)
-            - "python": Return Python object (uses pickle, slower)
-        errors: Error handling mode for invalid UTF-8
         auto_unescape: Automatically handle DB-escaped strings
 
     Returns:
@@ -73,41 +70,24 @@ def php_deserialize_udf(
     from pyspark.sql.functions import udf
     from pyspark.sql.types import StringType
 
-    from php_deserialize import loads, loads_json
+    from php_deserialize import loads_json
 
-    if output_format == "json":
-        @udf(returnType=StringType())
-        def _deserialize(data: Optional[bytes]) -> Optional[str]:
-            if data is None:
-                return None
-            try:
-                # Handle string input (common in Spark)
-                if isinstance(data, str):
-                    data = data.encode("utf-8")
-                return loads_json(data, auto_unescape=auto_unescape)
-            except Exception:
-                return None
+    @udf(returnType=StringType())
+    def _deserialize(data: Optional[bytes]) -> Optional[str]:
+        if data is None:
+            return None
+        try:
+            # Handle string input (common in Spark)
+            if isinstance(data, str):
+                data = data.encode("utf-8")
+            return loads_json(data, auto_unescape=auto_unescape)
+        except Exception:
+            return None
 
-        return _deserialize
-    else:
-        # For Python output, we need to serialize to JSON anyway
-        # because Spark can't handle arbitrary Python objects
-        @udf(returnType=StringType())
-        def _deserialize(data: Optional[bytes]) -> Optional[str]:
-            if data is None:
-                return None
-            try:
-                if isinstance(data, str):
-                    data = data.encode("utf-8")
-                return loads_json(data, auto_unescape=auto_unescape)
-            except Exception:
-                return None
-
-        return _deserialize
+    return _deserialize
 
 
 def php_deserialize_pandas_udf(
-    errors: Literal["strict", "replace", "bytes"] = "replace",
     auto_unescape: bool = True,
 ) -> Callable:
     """
@@ -117,7 +97,6 @@ def php_deserialize_pandas_udf(
     as it processes data in batches.
 
     Args:
-        errors: Error handling mode for invalid UTF-8
         auto_unescape: Automatically handle DB-escaped strings
 
     Returns:

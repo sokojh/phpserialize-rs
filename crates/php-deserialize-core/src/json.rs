@@ -22,7 +22,7 @@ use crate::types::PhpValue;
 /// | `array` (associative) | `object` |
 /// | `object` | `object` with `__class__` field |
 /// | `enum` | `string` ("ClassName::CaseName") |
-/// | `reference` | `null` (references not resolved) |
+/// | `reference` | `object` (`{"__ref__": idx}`) |
 ///
 /// # Example
 ///

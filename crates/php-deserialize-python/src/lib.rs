@@ -24,15 +24,8 @@ fn php_value_to_python(py: Python<'_>, value: &PhpValue, errors: &str) -> PyResu
                 Err(_) => {
                     match errors {
                         "strict" => Err(PyValueError::new_err("Invalid UTF-8 in string")),
-                        "replace" => {
-                            let string = String::from_utf8_lossy(s);
-                            Ok(string.to_object(py))
-                        }
                         "bytes" => Ok(PyBytes::new_bound(py, s).to_object(py)),
-                        "surrogateescape" => {
-                            let string = String::from_utf8_lossy(s);
-                            Ok(string.to_object(py))
-                        }
+                        // "replace" and any other value: replace invalid bytes with replacement character
                         _ => {
                             let string = String::from_utf8_lossy(s);
                             Ok(string.to_object(py))
@@ -125,7 +118,6 @@ fn php_value_to_python(py: Python<'_>, value: &PhpValue, errors: &str) -> PyResu
 ///         - "strict": Raise an exception
 ///         - "replace": Replace invalid bytes with replacement character (default)
 ///         - "bytes": Return bytes instead of string for binary data
-///         - "surrogateescape": Use surrogateescape encoding
 ///     auto_unescape: Automatically detect and unescape DB-exported strings (default: True)
 ///     strict: Disable automatic fallback for string length mismatches (default: False)
 ///         When False (default), the parser will automatically try lenient recovery

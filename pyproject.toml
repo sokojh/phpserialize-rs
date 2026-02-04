@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "phpserialize-rs"
-version = "0.1.1"
+version = "0.1.2"
 description = "High-performance PHP serialize/unserialize parser written in Rust with Python bindings"
 readme = "README.md"
 license = { text = "MIT OR Apache-2.0" }
@@ -50,6 +50,7 @@ features = ["pyo3/extension-module"]
 python-source = "python"
 module-name = "php_deserialize._core"
 manifest-path = "crates/php-deserialize-python/Cargo.toml"
+include = ["LICENSE", "README.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/python"]
